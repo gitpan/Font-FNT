@@ -1,6 +1,6 @@
 package Font::FNT;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use strict;
 use warnings;
@@ -243,6 +243,69 @@ Saves a Font::FNT instance as .FNT file.
 
 =back
 
+=head1 EXAMPLE
+
+The test directory contains a serialized Font::FNT instance
+(1252_13x8_OEM.yml) that can be used to install a nice Console
+(Terminal) font - at least on a Windows NT 4.0 box.
+Other Windows versions may require other steps.
+
+The font is similar to the bold BorlandTE font (BORTE.FON) or
+Raize font.
+
+Let's create the .FNT file first:
+
+  use Font::FNT();
+  Font::FNT->load_yaml('t/1252_13x8_OEM.yml')->save('t/1252_13x8_OEM.fnt');
+
+Normally, various .FNT files for different sizes and weights are
+packaged together as resources in a Windows DLL (.FON file).
+BTW: most .FON files are good old Windows 3.1 DLLs.
+For our purpose, the .FNT file is o.k.
+
+Next, add something like
+
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts]
+  "1252 13x8 OEM"="1252_13x8_OEM.fnt"
+
+to your registry, copy the font by hand
+
+  copy t\1252_13x8_OEM.fnt %SystemRoot%\Fonts
+
+and reboot your system.
+
+If you don't need control about your registry entries, then
+you can simply drag'n drop t/1252_13x8_OEM.fnt into the Fonts
+Control Panel Applet.
+
+Now, if you open the Console properties dialog or the Console
+Control Panel Applet, go to the font tab and select 'Raster Fonts',
+you should see a new entry in the 'Size' listbox:
+
+  8 x 13
+
+Configuring the font in the Control Panel results in the following
+registry entries:
+
+  [HKEY_CURRENT_USER\Console]
+  "FaceName"="Terminal"
+  "FontSize"=dword:000d0008
+
+Finally, you should change the Console codepage:
+
+  mode con cp select=1252
+
+or
+
+  chcp 1252
+
+To change the codepage permanently, add the following to your
+registry:
+
+  [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Nls\CodePage]
+  "OEMCP"="1252"
+
+
 =head1 AUTHOR
 
 Steffen Goeldner <sgoeldner@cpan.org>
@@ -255,6 +318,41 @@ This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 =head1 SEE ALSO
+
+=head2 Microsoft Knowledge Base Article
+
+=over
+
+=item Windows Developers Notes: Font-File Format
+
+  http://support.microsoft.com/?scid=kb;EN-US;65123
+
+=item MyFont.exe - Creating a Custom Raster Font
+
+  http://support.microsoft.com/?scid=kb;EN-US;76535
+
+=item Necessary Criteria for Fonts to Be Available in a Command Window
+
+  http://support.microsoft.com/?scid=kb;EN-US;247815
+
+=item How to Change the OEM Code Page of Windows NT and Windows 95
+
+  http://support.microsoft.com/?scid=kb;EN-US;153449
+
+=back
+
+=head2 Microsoft Global Development and Computing Portal - Code Pages
+
+  http://www.microsoft.com/globaldev/reference/cphome.mspx
+
+=head2 Adobe Glyph Bitmap Distribution Format (BDF) Specification
+
+  http://partners.adobe.com/asn/developer/pdfs/tn/5005.BDF_Spec.pdf
+
+This format is similar in spirit to the YAML serialization of a
+Font::FNT instance.
+
+=head2 Perl modules
 
 L<perl>, L<YAML>, L<Image::Pbm>.
 
